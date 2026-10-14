@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Procvičování angličtiny</title>
+<style>
+/* reset-start */
+:root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; }
+[hidden] { display: none !important; }
+/* reset-end */
+
+/* Layout: one narrow workbook page. Steps: nickname, topic, level, quiz. The blank in a sentence is marked like a highlighter stroke. */
+:root {
+  --bg: #F4F6FA;
+  --surface: #FFFFFF;
+  --ink: #16233B;
+  --muted: #5B6783;
+  --line: #D9DFEA;
+  --accent: #2450D6;
+  --accent-ink: #FFFFFF;
+  --mark: #FFE36B;
+  --good: #17794F;
+  --good-bg: #E3F5EC;
+  --bad: #B8362D;
+  --bad-bg: #FBE9E7;
+  --font-display: 'Avenir Next', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1626; --surface: #18213A; --ink: #E8ECF6; --muted: #9AA6C4; --line: #2B3656;
+    --accent: #7C9BFF; --accent-ink: #0F1626; --mark: #5E5416;
+    --good: #5FD39A; --good-bg: #12332A; --bad: #FF8A80; --bad-bg: #3A1C1F;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1626; --surface: #18213A; --ink: #E8ECF6; --muted: #9AA6C4; --line: #2B3656;
+  --accent: #7C9BFF; --accent-ink: #0F1626; --mark: #5E5416;
+  --good: #5FD39A; --good-bg: #12332A; --bad: #FF8A80; --bad-bg: #3A1C1F;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.5;
+  padding-block: 24px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+button, input { font: inherit; color: inherit; -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+header { display: flex; flex-direction: column; gap: 8px; }
+h1 { font-size: 34px; font-weight: 700; }
+h2 { font-size: 24px; font-weight: 700; }
+header p { color: var(--muted); }
+.lbl { font-size: 14px; font-weight: 700; color: var(--muted); }
+.note { font-size: 14px; color: var(--muted); }
+.note a { color: var(--accent); }
+.link { background: none; border: 0; padding: 0; min-height: 44px; color: var(--accent); font-weight: 700; cursor: pointer; text-align: left; }
+
+/* Nickname */
+.nickbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 0 14px; min-height: 48px; }
+.nickbar strong { overflow-wrap: anywhere; }
+
+/* Topics */
+.topics { display: flex; flex-direction: column; gap: 10px; }
+.topic { display: flex; flex-direction: column; gap: 4px; text-align: left; width: 100%; background: var(--bg); border: 2px solid var(--line); border-radius: 12px; padding: 14px; min-height: 72px; cursor: pointer; }
+.topic:hover { border-color: var(--accent); }
+.topic .tt { font-family: var(--font-display); font-size: 20px; font-weight: 700; line-height: 1.2; }
+.topic .td { color: var(--muted); font-size: 15px; }
+.topic .tb { color: var(--muted); font-size: 13px; letter-spacing: .02em; }
+
+/* Levels */
+.levels { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; }
+.lvl { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; background: var(--bg); border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; min-height: 76px; cursor: pointer; min-width: 0; }
+.lvl .n { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.lvl .nm { font-family: var(--font-display); font-weight: 700; font-size: 18px; line-height: 1.2; }
+.lvl .sub { font-size: 12px; line-height: 1.3; color: var(--muted); }
+.lvl:hover { border-color: var(--accent); }
+.lvl[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
+.lvl[aria-pressed="true"] .n, .lvl[aria-pressed="true"] .sub { color: var(--accent-ink); opacity: .85; }
+
+/* Cheat sheet */
+details.cheat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+details.cheat summary { cursor: pointer; padding: 14px 16px; font-weight: 700; list-style: none; display: flex; justify-content: space-between; align-items: center; min-height: 48px; }
+details.cheat summary::-webkit-details-marker { display: none; }
+details.cheat summary::after { content: "+"; font-size: 22px; color: var(--accent); }
+details.cheat[open] summary::after { content: "–"; }
+.cheat-body { padding: 0 16px 16px; display: grid; gap: 16px; }
+.tense { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.tense h3 { font-size: 18px; }
+.tense .when { color: var(--muted); font-size: 15px; }
+.tense ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.tense li { display: flex; gap: 10px; align-items: baseline; }
+.tense li b { flex: 0 0 22px; color: var(--accent); font-family: var(--font-display); font-size: 18px; }
+.tense .rule { font-size: 15px; background: color-mix(in srgb, var(--mark) 55%, transparent); padding: 6px 10px; border-radius: 8px; }
+.signals { font-size: 15px; color: var(--muted); }
+
+/* Cards */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px 16px; display: flex; flex-direction: column; gap: 18px; }
+.meta { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 14px; color: var(--muted); font-weight: 700; }
+.track { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; }
+.track > div { height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .3s ease; }
+.task { font-size: 14px; font-weight: 700; color: var(--muted); letter-spacing: .02em; margin-bottom: -10px; }
+.prompt { font-family: var(--font-display); font-size: 26px; font-weight: 500; line-height: 1.3; overflow-wrap: anywhere; }
+.prompt.cz { font-family: var(--font-body); font-size: 21px; color: var(--muted); }
+.blank { display: inline-block; min-width: 3.2em; background: var(--mark); border-radius: 4px; padding: 0 .2em; margin: 0 .1em; }
+.blank.filled { font-weight: 700; }
+
+.answer { display: flex; flex-direction: column; gap: 10px; }
+.opt { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: var(--bg); border: 2px solid var(--line); border-radius: 12px; padding: 12px 14px; min-height: 52px; cursor: pointer; font-size: 18px; }
+.opt .letter { flex: 0 0 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 700; background: var(--surface); border: 1px solid var(--line); color: var(--muted); }
+.opt .txt { min-width: 0; overflow-wrap: anywhere; }
+.opt:hover:not(:disabled) { border-color: var(--accent); }
+.opt:disabled { cursor: default; }
+.opt.correct { border-color: var(--good); background: var(--good-bg); }
+.opt.correct .letter { background: var(--good); color: var(--surface); border-color: var(--good); }
+.opt.wrong { border-color: var(--bad); background: var(--bad-bg); }
+.opt.wrong .letter { background: var(--bad); color: var(--surface); border-color: var(--bad); }
+.opt.dim { opacity: .55; }
+
+.fill { width: 100%; background: var(--bg); border: 2px solid var(--line); border-radius: 12px; padding: 12px 14px; min-height: 52px; font-size: 18px; }
+.fill:focus { border-color: var(--accent); outline: none; }
+.fill.correct { border-color: var(--good); background: var(--good-bg); }
+.fill.wrong { border-color: var(--bad); background: var(--bad-bg); }
+
+.zone { min-height: 64px; border: 2px dashed var(--line); border-radius: 12px; padding: 8px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.zone.empty::before { content: "Klepej na slova níže"; color: var(--muted); font-size: 15px; padding: 0 6px; }
+.zone.good { border-style: solid; border-color: var(--good); background: var(--good-bg); }
+.zone.bad { border-style: solid; border-color: var(--bad); background: var(--bad-bg); }
+.pool { display: flex; flex-wrap: wrap; gap: 8px; min-height: 48px; }
+.tile { background: var(--bg); border: 2px solid var(--line); border-radius: 10px; padding: 8px 14px; min-height: 44px; font-size: 18px; cursor: pointer; }
+.zone .tile { background: var(--surface); }
+.tile:hover:not(:disabled) { border-color: var(--accent); }
+.tile:disabled { cursor: default; }
+
+.feedback { border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+.feedback.good { background: var(--good-bg); }
+.feedback.bad { background: var(--bad-bg); }
+.feedback strong { font-family: var(--font-display); font-size: 19px; }
+.feedback.good strong { color: var(--good); }
+.feedback.bad strong { color: var(--bad); }
+.feedback .yours { font-size: 15px; color: var(--muted); }
+.hint { background: color-mix(in srgb, var(--mark) 55%, transparent); border-radius: 12px; padding: 10px 14px; font-size: 16px; }
+
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 12px; padding: 12px 20px; min-height: 48px; font-weight: 700; cursor: pointer; flex: 1 1 auto; }
+.btn.ghost { background: transparent; color: var(--accent); border: 2px solid var(--accent); }
+.btn:hover:not(:disabled) { filter: brightness(1.08); }
+.btn:disabled { opacity: .45; cursor: default; }
+
+/* Results */
+.score { display: flex; align-items: baseline; gap: 10px; }
+.score .num { font-family: var(--font-display); font-size: 64px; font-weight: 700; line-height: 1; }
+.score .of { color: var(--muted); font-size: 22px; }
+.send { display: flex; flex-direction: column; gap: 4px; }
+.review { display: flex; flex-direction: column; gap: 12px; }
+.review h3 { font-size: 20px; }
+.miss { border: 1px solid var(--line); border-left: 4px solid var(--bad); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; background: var(--bg); }
+.miss .s { overflow-wrap: anywhere; }
+.miss .yours { color: var(--bad); font-size: 15px; overflow-wrap: anywhere; }
+.miss .why { color: var(--muted); font-size: 15px; }
+
+@media (min-width: 520px) {
+  .cheat-body { grid-template-columns: 1fr 1fr; }
+  .card { padding: 24px 22px; }
+}
+@media (prefers-reduced-motion: reduce) { .track > div { transition: none; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Angličtina · 1. ročník SŠ</p>
+    <h1>Procvičování angličtiny</h1>
+    <p id="lead"></p>
+  </header>
+
+  <section class="card" id="nickCard" hidden>
+    <label class="lbl" for="nick">Přezdívka (povinné)</label>
+    <input type="text" id="nick" class="fill" maxlength="30" required autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="go" placeholder="Např. Klára">
+    <p class="note">Přezdívka a výsledek každého dokončeného testu se odešlou lektorovi.</p>
+    <button class="btn" id="nickBtn" type="button" disabled>Pokračovat</button>
+  </section>
+
+  <div class="nickbar" id="nickBar" hidden>
+    <span>Přezdívka: <strong id="nickName"></strong></span>
+    <button class="link" id="nickChange" type="button">Změnit</button>
+  </div>
+
+  <section class="card" id="topicsCard" hidden>
+    <h2>Vyber téma</h2>
+    <p class="note" id="topicsNote"></p>
+    <div class="topics" id="topics"></div>
+  </section>
+
+  <section class="card" id="levelsCard" hidden>
+    <button class="link" id="backTopics" type="button">← Změnit téma</button>
+    <div>
+      <h2 id="topicTitle"></h2>
+      <p class="note" id="topicDesc"></p>
+    </div>
+    <nav class="levels" id="levels" aria-label="Obtížnost"></nav>
+  </section>
+
+  <details class="cheat" id="cheat" hidden>
+    <summary>Tahák k tématu</summary>
+    <div class="cheat-body" id="cheatBody"></div>
+  </details>
+
+  <section class="card" id="quiz" hidden>
+    <div class="meta"><span id="count"></span><span id="round"></span></div>
+    <div class="track" role="progressbar" aria-label="Postup v kvízu" aria-valuemin="0" aria-valuemax="100" id="track"><div id="bar"></div></div>
+    <p class="task" id="task"></p>
+    <p class="prompt" id="prompt"></p>
+    <div class="answer" id="answerArea"></div>
+    <p class="hint" id="hint" hidden></p>
+    <div class="feedback" id="fb" aria-live="polite" hidden></div>
+    <div class="row">
+      <button class="btn ghost" id="hintBtn" type="button">Nápověda</button>
+      <button class="btn" id="checkBtn" type="button" hidden>Zkontrolovat</button>
+      <button class="btn" id="nextBtn" type="button" hidden>Další otázka</button>
+    </div>
+  </section>
+
+  <section class="card" id="results" hidden>
+    <p class="eyebrow" id="resultsTitle">Výsledek</p>
+    <div class="score"><span class="num" id="scoreNum"></span><span class="of" id="scoreOf"></span></div>
+    <p id="scoreMsg"></p>
+    <div class="send" id="send" hidden>
+      <p class="note" id="sendStatus" aria-live="polite"></p>
+      <p class="note" id="manualWrap" hidden><a id="manualLink" href="#" target="_blank" rel="noopener">Nepřišlo? Otevřít formulář s vyplněnými údaji</a></p>
+    </div>
+    <div class="review" id="review" hidden>
+      <h3>Co si ještě projít</h3>
+      <div id="missList" class="review"></div>
+    </div>
+    <div class="row">
+      <button class="btn" id="nextLevelBtn" type="button" hidden></button>
+      <button class="btn" id="retryBtn" type="button" hidden>Opravit chyby</button>
+      <button class="btn ghost" id="againBtn" type="button">Začít znovu</button>
+      <button class="btn ghost" id="topicsBtn" type="button">Změnit téma</button>
+    </div>
+  </section>
+</main>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  var CFG = window.QUIZ_CONFIG || {};
+  var FIELDS = CFG.fields || {};
+  var LEVEL_KEYS = ["zaklad", "stredni", "tezsi"];
+  var LEVEL_NAMES = { zaklad: "Základ", stredni: "Střední", tezsi: "Těžší" };
+  var LEVEL_BLURB = { zaklad: "Nejjednodušší", stredni: "Pokročilejší", tezsi: "Nejnáročnější" };
+  var MAX_TOPICS = 50;
+  var LETTERS = ["A", "B", "C", "D", "E", "F"];
+  var TASKS = { choice: "Vyber správnou odpověď.", fill: "Napiš odpověď.", build: "Seřaď slova do věty." };
+  var BEST_KEY = "present-quiz-best-v2", NICK_KEY = "present-quiz-nick-v1", OUTBOX_KEY = "present-quiz-outbox-v1";
+
+  var REG = {};                       /* REG[topic] = { title, description, cheat, levels: { zaklad: { blurb, questions } } } */
+  window.QUIZ_REGISTRY = REG;
+  var loaded = false, view = "nick", nick = "";
+  var topic = null, level = null, list = [], pos = 0, score = 0, wrong = [], answered = false, isRetry = false, tiles = null;
+
+  function $(id) { return document.getElementById(id); }
+  function show(id, on) { $(id).hidden = !on; }
+  function goTo(id) { try { $(id).scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) {} }
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function loadBest() { try { return JSON.parse(lsGet(BEST_KEY)) || {}; } catch (e) { return {}; } }
+  function saveBest(k, v) { var b = loadBest(); if (b[k] == null || v > b[k]) { b[k] = v; lsSet(BEST_KEY, JSON.stringify(b)); } }
+
+  /* ---------- registering and discovering topic files ---------- */
+  /* Files are named <topic>-<level>.js (1-zaklad.js, 1-stredni.js, 1-tezsi.js, 2-zaklad.js ...) and call QUIZ_REG({...}). */
+  function validQuestion(q) {
+    if (!q) return false;
+    if (q.type === "choice") return typeof q.prompt === "string" && Array.isArray(q.options) && q.options.length >= 2 && q.correct >= 0 && q.correct < q.options.length;
+    if (q.type === "fill") return typeof q.prompt === "string" && Array.isArray(q.answers) && q.answers.length > 0;
+    if (q.type === "build") return Array.isArray(q.words) && q.words.length > 0 && Array.isArray(q.answers) && q.answers.length > 0;
+    return false;
+  }
+
+  window.QUIZ_REG = function (data) {
+    var s = document.currentScript;
+    if (!s || !data) return;
+    var t = s.getAttribute("data-topic"), l = s.getAttribute("data-level");
+    var all = data.questions || [], qs = all.filter(validQuestion);
+    if (qs.length !== all.length) console.warn(t + "-" + l + ".js: " + (all.length - qs.length) + " otázek má neplatný zápis a bylo vynecháno.");
+    if (!qs.length) { console.warn(t + "-" + l + ".js neobsahuje žádné platné otázky."); return; }
+    var T = REG[t] || (REG[t] = { levels: {}, title: null, description: null, cheat: null });
+    T.levels[l] = { blurb: data.blurb || null, questions: qs };
+    ["title", "description", "cheat"].forEach(function (k) {
+      if (data[k] && (!T[k] || l === "zaklad")) T[k] = data[k];
+    });
+  };
+
+  function loadScript(t, l) {
+    return new Promise(function (resolve) {
+      var s = document.createElement("script");
+      s.src = t + "-" + l + ".js";
+      s.async = true;
+      s.setAttribute("data-topic", t);
+      s.setAttribute("data-level", l);
+      s.onload = function () { resolve(true); };
+      s.onerror = function () { resolve(false); };
+      document.head.appendChild(s);
+    });
+  }
+
+  /* Tries topic 1, 2, 3 ... until a number has no file at all. */
+  function discover() {
+    var n = 1;
+    function next() {
+      if (n > MAX_TOPICS) return Promise.resolve();
+      var t = String(n);
+      return Promise.all(LEVEL_KEYS.map(function (l) { return loadScript(t, l); })).then(function () {
+        if (!REG[t]) return;
+        n++;
+        return next();
+      });
+    }
+    return next();
+  }
+
+  function topicKeys() { return Object.keys(REG).sort(function (a, b) { return a - b; }); }
+  function levelsOf(t) { return LEVEL_KEYS.filter(function (k) { return REG[t] && REG[t].levels[k]; }); }
+  function topicTitle(t) { return (REG[t] && REG[t].title) || ("Téma " + t); }
+
+  /* ---------- views: nick → topics → levels (+ quiz, results) ---------- */
+  var LEAD = {
+    nick: "Nejdřív napiš přezdívku, potom si vyber téma a obtížnost.",
+    topics: "Vyber téma, které chceš procvičovat.",
+    levels: "Vyber obtížnost. U každé odpovědi uvidíš vysvětlení."
+  };
+  function setView(v) {
+    view = v;
+    $("lead").textContent = LEAD[v];
+    show("nickCard", v === "nick");
+    show("nickBar", v !== "nick");
+    show("topicsCard", v === "topics");
+    show("levelsCard", v === "levels");
+    show("cheat", v === "levels" && !!(REG[topic] && REG[topic].cheat));
+    if (v !== "levels") { show("quiz", false); show("results", false); }
+  }
+
+  function confirmNick() {
+    var v = $("nick").value.trim();
+    if (!v) return;
+    nick = v.slice(0, 30);
+    lsSet(NICK_KEY, nick);
+    $("nickName").textContent = nick;
+    setView("topics");
+    renderTopics();
+  }
+
+  function renderTopics() {
+    var box = $("topics"), best = loadBest();
+    box.innerHTML = "";
+    var keys = topicKeys(), note = $("topicsNote");
+    if (!loaded) { note.textContent = "Načítám témata…"; note.hidden = false; return; }
+    if (!keys.length) {
+      note.textContent = "Nepodařilo se najít žádné téma. Zkontroluj, že soubory 1-zaklad.js, 1-stredni.js a 1-tezsi.js leží ve stejné složce jako index.html.";
+      note.hidden = false;
+      return;
+    }
+    note.textContent = "";
+    note.hidden = true;
+    keys.forEach(function (t) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "topic";
+      b.innerHTML = '<span class="tt"></span><span class="td"></span><span class="tb"></span>';
+      b.querySelector(".tt").textContent = topicTitle(t);
+      b.querySelector(".td").textContent = REG[t].description || "";
+      b.querySelector(".td").hidden = !REG[t].description;
+      b.querySelector(".tb").textContent = levelsOf(t).map(function (l) {
+        var n = REG[t].levels[l].questions.length, v = best[t + ":" + l];
+        return LEVEL_NAMES[l] + " " + (v != null ? v + "/" + n : "–");
+      }).join(" · ");
+      b.addEventListener("click", function () { pickTopic(t); });
+      box.appendChild(b);
+    });
+  }
+
+  function pickTopic(t) {
+    topic = t; level = null;
+    var T = REG[t];
+    $("topicTitle").textContent = topicTitle(t);
+    $("topicDesc").textContent = T.description || "";
+    $("topicDesc").hidden = !T.description;
+    $("cheatBody").innerHTML = T.cheat || "";
+    setView("levels");
+    renderLevels();
+    try { window.scrollTo({ top: 0 }); } catch (e) {}
+  }
+
+  function renderLevels() {
+    var nav = $("levels"), best = loadBest();
+    nav.innerHTML = "";
+    levelsOf(topic).forEach(function (k) {
+      var L = REG[topic].levels[k], v = best[topic + ":" + k], b = document.createElement("button");
+      b.type = "button";
+      b.className = "lvl";
+      b.setAttribute("aria-pressed", String(k === level));
+      b.innerHTML = '<span class="n"></span><span class="nm"></span><span class="sub"></span>';
+      b.querySelector(".n").textContent = "Úroveň " + (LEVEL_KEYS.indexOf(k) + 1);
+      b.querySelector(".nm").textContent = LEVEL_NAMES[k];
+      b.querySelector(".sub").textContent = v != null ? "Nejlepší " + v + "/" + L.questions.length : (L.blurb || LEVEL_BLURB[k]);
+      b.addEventListener("click", function () { startLevel(k); });
+      nav.appendChild(b);
+    });
+  }
+
+  function startLevel(k, quiet) {
+    level = k;
+    begin(REG[topic].levels[k].questions.slice(), false, quiet);
+    renderLevels();
+  }
+
+  function begin(qs, retry, quiet) {
+    list = qs; pos = 0; score = 0; wrong = []; isRetry = !!retry;
+    show("quiz", true); show("results", false);
+    render(!quiet);
+    if (!quiet) goTo("quiz");
+  }
+
+  /* ---------- answer checking ---------- */
+  /* Normalise a typed answer: case, spaces, final punctuation, curly apostrophes, "is not" → "isn't". */
+  function norm(s) {
+    s = String(s).toLowerCase().replace(/[‘’´`]/g, "'").replace(/\s+/g, " ").trim();
+    s = s.replace(/[.?!]+$/, "").trim();
+    return s.replace(/\bdo not\b/g, "don't").replace(/\bdoes not\b/g, "doesn't").replace(/\bis not\b/g, "isn't")
+      .replace(/\bare not\b/g, "aren't").replace(/\bwas not\b/g, "wasn't").replace(/\bwere not\b/g, "weren't");
+  }
+  function matches(q, text) {
+    var t = norm(text);
+    return q.answers.some(function (a) { return norm(a) === t; });
+  }
+  function correctText(q) { return q.type === "choice" ? q.options[q.correct] : q.answers[0]; }
+  function blanks(text) { return text.split("___").length - 1; }
+  function stripParens(s) { return s.replace(/\s*\([^)]*\)/g, ""); }
+  function reviewSentence(q) {
+    var c = correctText(q);
+    if (q.type === "build") return c;
+    if (blanks(q.prompt) === 1) return stripParens(q.prompt.replace("___", c));
+    if (q.type === "choice") return blanks(q.prompt) > 1 ? q.prompt + " → " + c : c;
+    return c;
+  }
+  function shuffledWords(q) {
+    var target = norm(q.answers[0]), w, tries = 0;
+    do {
+      w = q.words.slice();
+      for (var i = w.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1)), t = w[i]; w[i] = w[j]; w[j] = t;
+      }
+      tries++;
+    } while (norm(w.join(" ")) === target && tries < 10);
+    return w;
+  }
+
+  /* ---------- rendering a question ---------- */
+  function setPrompt(q, filled) {
+    var el = $("prompt"), text = q.type === "build" ? q.cz : q.prompt;
+    el.innerHTML = "";
+    el.className = "prompt" + (q.type === "build" ? " cz" : "");
+    if (!text) { el.hidden = true; return; }
+    el.hidden = false;
+    var parts = text.split("___");
+    parts.forEach(function (p, i) {
+      el.appendChild(document.createTextNode(p));
+      if (i < parts.length - 1) {
+        var s = document.createElement("span");
+        if (filled && parts.length === 2) { s.className = "blank filled"; s.textContent = filled; }
+        else { s.className = "blank"; s.innerHTML = "&nbsp;"; }
+        el.appendChild(s);
+      }
+    });
+  }
+
+  function render(userAction) {
+    var q = list[pos];
+    answered = false;
+    $("count").textContent = "Otázka " + (pos + 1) + " z " + list.length;
+    $("round").textContent = (isRetry ? "Opravné kolo · " : "") + LEVEL_NAMES[level];
+    $("bar").style.width = (pos / list.length * 100) + "%";
+    $("track").setAttribute("aria-valuenow", String(Math.round(pos / list.length * 100)));
+    $("task").textContent = q.instruction || TASKS[q.type];
+    setPrompt(q, null);
+
+    var area = $("answerArea");
+    area.innerHTML = "";
+    if (q.type === "choice") buildChoice(q, area);
+    else if (q.type === "fill") buildFill(q, area, userAction);
+    else buildTiles(q, area);
+
+    show("hint", false); show("fb", false); show("nextBtn", false);
+    $("hintBtn").hidden = !q.hint;
+    $("checkBtn").hidden = q.type === "choice";
+  }
+
+  function buildChoice(q, area) {
+    q.options.forEach(function (text, i) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "opt";
+      b.innerHTML = '<span class="letter">' + LETTERS[i] + '</span><span class="txt"></span>';
+      b.querySelector(".txt").textContent = text;
+      b.addEventListener("click", function () { answerChoice(i); });
+      area.appendChild(b);
+    });
+  }
+
+  function buildFill(q, area, focus) {
+    var inp = document.createElement("input");
+    inp.type = "text";
+    inp.id = "fillInput";
+    inp.className = "fill";
+    inp.placeholder = "Napiš odpověď";
+    inp.setAttribute("autocomplete", "off");
+    inp.setAttribute("autocapitalize", "off");
+    inp.setAttribute("autocorrect", "off");
+    inp.setAttribute("spellcheck", "false");
+    inp.setAttribute("enterkeyhint", "done");
+    inp.setAttribute("aria-label", "Tvoje odpověď");
+    inp.addEventListener("input", function () { $("checkBtn").disabled = !inp.value.trim(); });
+    inp.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); if (inp.value.trim()) answerFill(); }
+    });
+    area.appendChild(inp);
+    $("checkBtn").disabled = true;
+    if (focus) { try { inp.focus({ preventScroll: true }); } catch (e) {} }
+  }
+
+  function buildTiles(q, area) {
+    var words = shuffledWords(q);
+    tiles = { pool: words.map(function (w, i) { return { w: w, id: i }; }), built: [] };
+    var zone = document.createElement("div");
+    zone.className = "zone empty"; zone.id = "zone";
+    zone.setAttribute("aria-label", "Tvoje věta");
+    var pool = document.createElement("div");
+    pool.className = "pool"; pool.id = "pool";
+    area.appendChild(zone);
+    area.appendChild(pool);
+    drawTiles();
+  }
+
+  function tileButton(t, from) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "tile";
+    b.textContent = t.w;
+    if (answered) { b.disabled = true; return b; }
+    b.addEventListener("click", function () {
+      var src = from === "pool" ? tiles.pool : tiles.built;
+      var dst = from === "pool" ? tiles.built : tiles.pool;
+      var idx = src.indexOf(t);
+      if (idx < 0) return;
+      src.splice(idx, 1);
+      dst.push(t);
+      if (from === "built") dst.sort(function (a, c) { return a.id - c.id; });
+      drawTiles();
+    });
+    return b;
+  }
+
+  function drawTiles() {
+    var zone = $("zone"), pool = $("pool");
+    zone.innerHTML = ""; pool.innerHTML = "";
+    tiles.built.forEach(function (t) { zone.appendChild(tileButton(t, "built")); });
+    tiles.pool.forEach(function (t) { pool.appendChild(tileButton(t, "pool")); });
+    zone.classList.toggle("empty", tiles.built.length === 0);
+    $("checkBtn").disabled = tiles.pool.length > 0;
+  }
+
+  /* ---------- answering ---------- */
+  function answerChoice(i) {
+    if (answered) return;
+    var q = list[pos], ok = i === q.correct;
+    var btns = $("answerArea").children;
+    for (var k = 0; k < btns.length; k++) {
+      btns[k].disabled = true;
+      if (k === q.correct) btns[k].classList.add("correct");
+      else if (k === i) btns[k].classList.add("wrong");
+      else btns[k].classList.add("dim");
+    }
+    if (blanks(q.prompt) === 1) setPrompt(q, q.options[q.correct]);
+    settle(q, ok, q.options[i]);
+  }
+
+  function answerFill() {
+    if (answered) return;
+    var q = list[pos], inp = $("fillInput"), given = inp.value.trim(), ok = matches(q, given);
+    inp.disabled = true;
+    inp.classList.add(ok ? "correct" : "wrong");
+    if (blanks(q.prompt) === 1 && ok) setPrompt(q, given);
+    settle(q, ok, given);
+  }
+
+  function answerBuild() {
+    if (answered) return;
+    var q = list[pos];
+    var given = tiles.built.map(function (t) { return t.w; }).join(" ");
+    var ok = matches(q, given);
+    settle(q, ok, given);
+    $("zone").classList.add(ok ? "good" : "bad");
+  }
+
+  function settle(q, ok, given) {
+    answered = true;
+    if (q.type === "build") drawTiles();
+    if (ok) score++; else wrong.push({ q: q, given: given });
+
+    var fb = $("fb");
+    fb.className = "feedback " + (ok ? "good" : "bad");
+    fb.innerHTML = "<strong></strong>";
+    fb.querySelector("strong").textContent = ok ? "Správně!" : "Tentokrát ne. Správně je: " + correctText(q);
+    if (!ok && q.type !== "choice" && given) {
+      var y = document.createElement("span");
+      y.className = "yours";
+      y.textContent = "Tvoje odpověď: " + given;
+      fb.appendChild(y);
+    }
+    var w = document.createElement("span");
+    w.textContent = q.why || "";
+    fb.appendChild(w);
+    show("fb", true);
+    show("hint", false);
+    $("hintBtn").hidden = true;
+    $("checkBtn").hidden = true;
+    $("nextBtn").textContent = pos === list.length - 1 ? "Zobrazit výsledek" : "Další otázka";
+    show("nextBtn", true);
+    try { $("nextBtn").focus({ preventScroll: true }); } catch (e) {}
+  }
+
+  /* ---------- sending the result to the teacher's Google Form ---------- */
+  function readOutbox() { try { var a = JSON.parse(lsGet(OUTBOX_KEY)); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+  function writeOutbox(a) { lsSet(OUTBOX_KEY, JSON.stringify(a)); }
+
+  /* no-cors: the browser sends the data but never shows Google's answer. */
+  function postForm(payload) {
+    if (typeof fetch !== "function") return Promise.reject(new Error("fetch unavailable"));
+    return fetch(CFG.formUrl, { method: "POST", mode: "no-cors", body: new URLSearchParams(payload) });
+  }
+
+  var flushing = false;
+  function flushOutbox() {
+    if (!CFG.formUrl || flushing || !readOutbox().length) return;
+    flushing = true;
+    (function next() {
+      var cur = readOutbox();
+      if (!cur.length) { flushing = false; return; }
+      postForm(cur[0]).then(function () { cur.shift(); writeOutbox(cur); next(); }).catch(function () { flushing = false; });
+    })();
+  }
+
+  function buildPayload() {
+    var L = REG[topic].levels[level];
+    var missed = wrong.map(function (w) { return L.questions.indexOf(w.q) + 1; }).sort(function (a, b) { return a - b; });
+    var p = {}, label;
+    if (CFG.levelLabels && CFG.levelLabels[level]) {
+      label = CFG.levelLabels[level];
+    } else {
+      label = FIELDS.topic ? LEVEL_NAMES[level] : topicTitle(topic) + " – " + LEVEL_NAMES[level] + " (" + list.length + " otázek)";
+      if (isRetry) label += " (opravné kolo)";
+    }
+    p[FIELDS.nick] = nick;
+    p[FIELDS.level] = label;
+    p[FIELDS.score] = String(score);
+    p[FIELDS.missed] = missed.length ? missed.join(", ") : "žádné";
+    if (FIELDS.topic) p[FIELDS.topic] = topicTitle(topic);
+    return p;
+  }
+
+  function submitResult() {
+    var box = $("send");
+    if (!CFG.formUrl || !FIELDS.nick) { box.hidden = true; return; }
+    var payload = buildPayload();
+    box.hidden = false;
+    $("sendStatus").textContent = "Odesílám výsledek lektorovi…";
+    $("manualWrap").hidden = true;
+    var manual = CFG.formUrl.replace(/\/formResponse$/, "/viewform") + "?usp=pp_url&" + new URLSearchParams(payload).toString();
+    $("manualLink").href = manual;
+    postForm(payload).then(function () {
+      $("sendStatus").textContent = "Výsledek odeslán lektorovi.";
+      $("manualWrap").hidden = false;
+    }).catch(function () {
+      var ob = readOutbox(); ob.push(payload); writeOutbox(ob);
+      $("sendStatus").textContent = "Teď se výsledek odeslat nepodařilo. Je uložený a odešle se sám, až budeš online a otevřeš stránku.";
+      $("manualWrap").hidden = false;
+    });
+  }
+
+  /* ---------- results ---------- */
+  function finish() {
+    show("quiz", false); show("results", true);
+    $("bar").style.width = "100%";
+    $("scoreNum").textContent = score;
+    $("scoreOf").textContent = "z " + list.length;
+    $("resultsTitle").textContent = (isRetry ? "Opravné kolo" : "Výsledek") + " · " + topicTitle(topic) + " · " + LEVEL_NAMES[level];
+    var ratio = score / list.length, msg;
+    if (score === list.length) msg = "Bez chyby. Můžeš zkusit těžší úroveň.";
+    else if (ratio >= 0.75) msg = "Moc pěkné. Projdi si pár chyb níž a bude to jistota.";
+    else if (ratio >= 0.5) msg = "Slušný základ. Podívej se na tahák a zkus opravné kolo.";
+    else msg = "Nevadí. Nejdřív si pročti tahák nahoře a pak zkus opravné kolo.";
+    $("scoreMsg").textContent = msg;
+
+    var box = $("missList");
+    box.innerHTML = "";
+    wrong.forEach(function (w) {
+      var div = document.createElement("div");
+      div.className = "miss";
+      div.innerHTML = '<strong class="s"></strong><span class="yours"></span><span class="why"></span>';
+      div.querySelector(".s").textContent = reviewSentence(w.q);
+      div.querySelector(".yours").textContent = "Tvoje odpověď: " + w.given;
+      div.querySelector(".why").textContent = w.q.why || "";
+      box.appendChild(div);
+    });
+    show("review", wrong.length > 0);
+    show("retryBtn", wrong.length > 0);
+
+    var avail = levelsOf(topic), nextLevel = avail[avail.indexOf(level) + 1];
+    var tk = topicKeys(), nextTopic = tk[tk.indexOf(topic) + 1];
+    var btn = $("nextLevelBtn");
+    if (ratio >= 0.7 && nextLevel) {
+      btn.textContent = "Další úroveň: " + LEVEL_NAMES[nextLevel];
+      btn.dataset.kind = "level"; btn.dataset.key = nextLevel; btn.hidden = false;
+    } else if (ratio >= 0.7 && nextTopic) {
+      btn.textContent = "Další téma: " + topicTitle(nextTopic);
+      btn.dataset.kind = "topic"; btn.dataset.key = nextTopic; btn.hidden = false;
+    } else {
+      btn.hidden = true;
+    }
+    if (!isRetry) { saveBest(topic + ":" + level, score); renderLevels(); }
+    submitResult();
+    goTo("results");
+  }
+
+  /* ---------- wiring ---------- */
+  $("nick").addEventListener("input", function () { $("nickBtn").disabled = !this.value.trim(); });
+  $("nick").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); confirmNick(); } });
+  $("nickBtn").addEventListener("click", confirmNick);
+  $("nickChange").addEventListener("click", function () {
+    $("nick").value = nick;
+    $("nickBtn").disabled = !nick;
+    setView("nick");
+    try { $("nick").focus(); } catch (e) {}
+  });
+  $("backTopics").addEventListener("click", function () { setView("topics"); renderTopics(); });
+  $("topicsBtn").addEventListener("click", function () { setView("topics"); renderTopics(); try { window.scrollTo({ top: 0 }); } catch (e) {} });
+  $("hintBtn").addEventListener("click", function () {
+    var q = list[pos];
+    if (!q || !q.hint) return;
+    $("hint").textContent = q.hint;
+    show("hint", true);
+  });
+  $("checkBtn").addEventListener("click", function () {
+    var q = list[pos];
+    if (q.type === "fill") answerFill(); else if (q.type === "build") answerBuild();
+  });
+  $("nextBtn").addEventListener("click", function () {
+    if (pos === list.length - 1) finish(); else { pos++; render(true); }
+  });
+  $("retryBtn").addEventListener("click", function () {
+    begin(wrong.map(function (w) { return w.q; }), true);
+  });
+  $("againBtn").addEventListener("click", function () { startLevel(level); });
+  $("nextLevelBtn").addEventListener("click", function () {
+    if (this.dataset.kind === "topic") { pickTopic(this.dataset.key); } else { startLevel(this.dataset.key); }
+  });
+  window.addEventListener("online", flushOutbox);
+
+  /* ---------- start ---------- */
+  var saved = (lsGet(NICK_KEY) || "").trim();
+  if (saved) {
+    nick = saved.slice(0, 30);
+    $("nickName").textContent = nick;
+    setView("topics");
+  } else {
+    setView("nick");
+  }
+  renderTopics();
+  discover().then(function () {
+    loaded = true;
+    if (view === "topics") renderTopics();
+    flushOutbox();
+  });
+})();
+</script>
+</body>
+</html>
