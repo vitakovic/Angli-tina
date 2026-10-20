@@ -163,6 +163,20 @@ details.cheat[open] summary::after { content: "–"; }
 .btn:hover:not(:disabled) { filter: brightness(1.08); }
 .btn:disabled { opacity: .45; cursor: default; }
 
+/* After answering: a tighter question card, so the explanation and the Next button fit on one screen. Unpicked wrong options are hidden. */
+#quiz.done { gap: 12px; }
+#quiz.done .prompt { font-size: 21px; }
+#quiz.done .prompt.cz { font-size: 17px; }
+#quiz.done .answer { gap: 6px; }
+#quiz.done .opt { min-height: 40px; padding: 6px 12px; font-size: 16px; }
+#quiz.done .opt .letter { flex-basis: 24px; height: 24px; font-size: 12px; }
+#quiz.done .opt.dim { display: none; }
+#quiz.done .fill, #quiz.done .tile { min-height: 40px; font-size: 16px; padding-block: 6px; }
+#quiz.done .zone { min-height: 0; }
+#quiz.done .feedback { padding: 10px 12px; font-size: 15px; line-height: 1.4; }
+#quiz.done .feedback strong { font-size: 17px; }
+#quiz.done .feedback .yours { font-size: 14px; }
+
 /* Results */
 .score { display: flex; align-items: baseline; gap: 10px; }
 .score .num { font-family: var(--font-display); font-size: 64px; font-weight: 700; line-height: 1; }
@@ -175,6 +189,14 @@ details.cheat[open] summary::after { content: "–"; }
 .miss .yours { color: var(--bad); font-size: 15px; overflow-wrap: anywhere; }
 .miss .why { color: var(--muted); font-size: 15px; }
 
+@media (max-width: 519px) {
+  body { padding-block: 12px 32px; }
+  main { gap: 14px; }
+  .card { gap: 14px; }
+  .prompt { font-size: 22px; }
+  .prompt.cz { font-size: 19px; }
+  .opt, .fill, .tile { font-size: 17px; }
+}
 @media (min-width: 520px) {
   .cheat-body { grid-template-columns: 1fr 1fr; }
   .card { padding: 24px 22px; }
@@ -494,6 +516,7 @@ details.cheat[open] summary::after { content: "–"; }
   function render(userAction) {
     var q = list[pos];
     answered = false;
+    $("quiz").classList.remove("done");
     $("count").textContent = "Otázka " + (pos + 1) + " z " + list.length;
     $("round").textContent = (isRetry ? "Opravné kolo · " : "") + LEVEL_NAMES[level];
     $("bar").style.width = (pos / list.length * 100) + "%";
@@ -643,7 +666,20 @@ details.cheat[open] summary::after { content: "–"; }
     $("checkBtn").hidden = true;
     $("nextBtn").textContent = pos === list.length - 1 ? "Zobrazit výsledek" : "Další otázka";
     show("nextBtn", true);
+    $("quiz").classList.add("done");
     try { $("nextBtn").focus({ preventScroll: true }); } catch (e) {}
+    revealNext();
+  }
+
+  /* Scroll only when the Next button ended up below the visible area. */
+  function revealNext() {
+    var raf = window.requestAnimationFrame || function (f) { setTimeout(f, 16); };
+    raf(function () {
+      var b = $("nextBtn"), r = b.getBoundingClientRect();
+      if (r.bottom > (window.innerHeight || document.documentElement.clientHeight) - 8) {
+        try { b.scrollIntoView({ behavior: "smooth", block: "end" }); } catch (e) { b.scrollIntoView(false); }
+      }
+    });
   }
 
   /* ---------- sending the result to the teacher's Google Form ---------- */
@@ -772,7 +808,12 @@ details.cheat[open] summary::after { content: "–"; }
     if (q.type === "fill") answerFill(); else if (q.type === "build") answerBuild();
   });
   $("nextBtn").addEventListener("click", function () {
-    if (pos === list.length - 1) finish(); else { pos++; render(true); }
+    if (pos === list.length - 1) finish();
+    else {
+      pos++;
+      render(true);
+      if ($("quiz").getBoundingClientRect().top < 0) goTo("quiz");
+    }
   });
   $("retryBtn").addEventListener("click", function () {
     begin(wrong.map(function (w) { return w.q; }), true);
